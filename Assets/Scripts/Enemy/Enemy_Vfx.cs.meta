@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: dc8600923de8308469398d72f764bfcc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - vfxMaterial: {fileID: 2100000, guid: 2d86f9b400671c741a3eb15b177253e7, type: 2}
+  - attackAlert: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
