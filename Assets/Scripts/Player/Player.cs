@@ -46,7 +46,8 @@ public class Player : Entity
     [Header("Jump Buffer")]
     public float jumpBufferTime = 0.2f;
     private float jumpBufferCounter;
-
+    [Header("Components")]
+    public Entity_Stamina stamina;
     public float lastAttackTime { get; private set; }
     public float lastDashTime { get; private set; }
     public float lastGroundedTime { get; private set; }

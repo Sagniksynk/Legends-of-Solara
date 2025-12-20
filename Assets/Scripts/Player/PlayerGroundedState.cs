@@ -12,7 +12,7 @@ public class PlayerGroundedState : EntityState
         base.Update();
 
 
-        if (player.dashInput && player.CanDash())
+        if (player.dashInput && player.CanDash() && player.stamina.TryConsumeStamina(player.stamina.dashCost))
         {
             stateMachine.ChangeState(player.dashState);
             return;
@@ -26,7 +26,7 @@ public class PlayerGroundedState : EntityState
         }
 
 
-        if(player.jumpInput)
+        if(player.jumpInput && player.stamina.TryConsumeStamina(player.stamina.jumpCost))
         {
             player.stateMachine.ChangeState(player.jumpState);
             return;
@@ -36,7 +36,7 @@ public class PlayerGroundedState : EntityState
             player.stateMachine.ChangeState(player.basicAttackState);
             return;
         }
-        if(player.HasBufferedJump() || player.jumpInput) 
+        if(player.HasBufferedJump() || player.jumpInput && player.stamina.TryConsumeStamina(player.stamina.jumpCost)) 
         {
             player.UseJumpBuffer();
             player.stateMachine.ChangeState(player.jumpState);

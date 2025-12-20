@@ -11,12 +11,12 @@ public class PlayerAiredState : EntityState
     public override void Update()
     {
         base.Update();
-        if (player.jumpInput && Time.time < player.lastGroundedTime + player.coyoteTime)
+        if (player.jumpInput && Time.time < player.lastGroundedTime + player.coyoteTime && player.stamina.TryConsumeStamina(player.stamina.jumpCost))
         {
             stateMachine.ChangeState(player.jumpState);
             return;
         }
-        if (player.dashInput && player.CanDash())
+        if (player.dashInput && player.CanDash() && player.stamina.TryConsumeStamina(player.stamina.dashCost))
         {
             stateMachine.ChangeState(player.dashState);
         }
