@@ -5,6 +5,7 @@ public class Entity_Health : MonoBehaviour, IDamageable
 {
     private EntityHit_Vfx entityHit_Vfx;
     private Entity entity;
+    private Entity_Stats stats;
 
     public event Action OnDie;
     public event Action OnHealthChanged;
@@ -23,20 +24,27 @@ public class Entity_Health : MonoBehaviour, IDamageable
     {
         entityHit_Vfx = GetComponent<EntityHit_Vfx>();
         entity = GetComponent<Entity>();
+        stats = GetComponent<Entity_Stats>();
     }
     protected virtual void Start()
     {
-        currentHealth = maxHealth;
+        currentHealth = stats.GetMaxHealth();
         //OnHealthChanged?.Invoke();
     }
     
     public virtual void TakeDamage(float damage, Transform attacker)
     {
         if(isDead) return;
+
+        damage -= stats.GetTotalArmor();
+        damage = Mathf.Clamp(damage,1,float.MaxValue);
+
         Vector2 knockback = CalculateKnockback(damage,attacker);
         float duration = CalculateDuration(damage);
+
         entity?.RecieveKnockback(knockback,duration);
         entityHit_Vfx?.PlayVfx();
+
         ReduceHealth(damage);
     }
     protected void ReduceHealth(float damage)
@@ -50,7 +58,7 @@ public class Entity_Health : MonoBehaviour, IDamageable
     }
     public float GetHealthNormalized()
     {
-        return currentHealth/maxHealth;
+        return currentHealth/stats.GetMaxHealth();
     }
 
     protected virtual void Die()
@@ -67,5 +75,5 @@ public class Entity_Health : MonoBehaviour, IDamageable
         return knockback;
     }
     private float CalculateDuration(float damage) => IsHeavyDamage(damage) ? heavyknockbackDuration : knockbackDuration;
-    private bool IsHeavyDamage(float damage) => damage / maxHealth > heavyDamageThreshold;
+    private bool IsHeavyDamage(float damage) => damage / stats.GetMaxHealth() > heavyDamageThreshold;
 }

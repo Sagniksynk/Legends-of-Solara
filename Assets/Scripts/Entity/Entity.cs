@@ -7,6 +7,7 @@ public abstract class Entity : MonoBehaviour
     public Rigidbody2D rb { get; private set; }
     public Animator animator { get; private set; }
     public StateMachine stateMachine { get; private set; }
+    public Entity_Stats stats { get; private set; }
     
     public EntityDeadState deadState;
     public Collider2D cd { get; private set; } // 1. Added cached Collider
@@ -37,6 +38,7 @@ public abstract class Entity : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponentInChildren<Animator>();
         cd = GetComponent<Collider2D>(); // 2. Cache collider here
+        stats = GetComponent<Entity_Stats>();
         stateMachine = new StateMachine();
 
         defaultGravity = rb.gravityScale;
