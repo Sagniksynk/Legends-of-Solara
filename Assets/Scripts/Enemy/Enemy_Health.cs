@@ -9,9 +9,9 @@ public class Enemy_Health : Entity_Health
         base.Start();
         enemy = GetComponent<Enemy>();
     }
-    public override void TakeDamage(float damage, Transform attacker)
+    public override void TakeDamage(float physicalDamage, float magicDamage, Transform attacker, bool isCritical)
     {
-        base.TakeDamage(damage, attacker);
+        base.TakeDamage(physicalDamage,magicDamage, attacker,isCritical);
         if(enemy != null && !isDead)
         {
             enemy.DamageImpact(attacker);

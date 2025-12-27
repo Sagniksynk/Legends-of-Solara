@@ -1069,6 +1069,7 @@ MonoBehaviour:
   vfxMaterial: {fileID: 2100000, guid: 2d86f9b400671c741a3eb15b177253e7, type: 2}
   vfxDuration: 0.15
   hitFxPrefab: {fileID: 5638162208666284069, guid: 2fba471c8bd504841b56029f053c06a2, type: 3}
+  criticalHitFxPrefab: {fileID: 0}
   hitFxPosition: {fileID: 0}
   randomHitOffset: {x: 0.3, y: 0.3}
 --- !u!114 &547547686
@@ -1083,8 +1084,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b3e52a2109129f40bd729fd9634330d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
   knockbackPower: {x: 1.5, y: 2.5}
   heavyKnockbackPower: {x: 7, y: 7}
   knockbackDuration: 0.2
@@ -1105,8 +1104,8 @@ MonoBehaviour:
   maxStamina: 100
   regenRate: 20
   regenDelay: 1.5
-  jumpCost: 15
-  dashCost: 25
+  jumpCost: 20
+  dashCost: 30
   attackCost: 10
 --- !u!114 &547547688
 MonoBehaviour:
@@ -1133,7 +1132,7 @@ MonoBehaviour:
     basevalue: 5
     modifiers: []
   damage:
-    basevalue: 0
+    basevalue: 10
     modifiers: []
   critChance:
     basevalue: 0
@@ -1141,14 +1140,17 @@ MonoBehaviour:
   critPower:
     basevalue: 0
     modifiers: []
-  magicDamage:
+  fireDamage:
     basevalue: 0
     modifiers: []
-  magicResistance:
+  iceDamage:
+    basevalue: 0
+    modifiers: []
+  lightningDamage:
     basevalue: 0
     modifiers: []
   maxHealth:
-    basevalue: 0
+    basevalue: 100
     modifiers: []
   armor:
     basevalue: 0
@@ -1156,6 +1158,10 @@ MonoBehaviour:
   evasion:
     basevalue: 0
     modifiers: []
+  magicResistance:
+    basevalue: 0
+    modifiers: []
+  currentHealth: 0
 --- !u!1 &581988346
 GameObject:
   m_ObjectHideFlags: 0
@@ -8595,6 +8601,7 @@ MonoBehaviour:
   vfxMaterial: {fileID: 2100000, guid: 2d86f9b400671c741a3eb15b177253e7, type: 2}
   vfxDuration: 0.15
   hitFxPrefab: {fileID: 0}
+  criticalHitFxPrefab: {fileID: 0}
   hitFxPosition: {fileID: 0}
   randomHitOffset: {x: 0, y: 0}
 --- !u!114 &1175655717
@@ -9718,8 +9725,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b3e52a2109129f40bd729fd9634330d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
   knockbackPower: {x: 1.5, y: 2.5}
   heavyKnockbackPower: {x: 7, y: 7}
   knockbackDuration: 0.2
@@ -9740,6 +9745,7 @@ MonoBehaviour:
   vfxMaterial: {fileID: 2100000, guid: 2d86f9b400671c741a3eb15b177253e7, type: 2}
   vfxDuration: 0.15
   hitFxPrefab: {fileID: 2459889498228341102, guid: 1ea116ca1705dbd46878d2474e925cfc, type: 3}
+  criticalHitFxPrefab: {fileID: 0}
   hitFxPosition: {fileID: 54479835}
   randomHitOffset: {x: 0.3, y: 0.3}
   attackAlert: {fileID: 1179828761}
@@ -9765,10 +9771,10 @@ MonoBehaviour:
     basevalue: 0
     modifiers: []
   vitality:
-    basevalue: 2
+    basevalue: 0
     modifiers: []
   damage:
-    basevalue: 0
+    basevalue: 10
     modifiers: []
   critChance:
     basevalue: 0
@@ -9776,14 +9782,17 @@ MonoBehaviour:
   critPower:
     basevalue: 0
     modifiers: []
-  magicDamage:
+  fireDamage:
     basevalue: 0
     modifiers: []
-  magicResistance:
+  iceDamage:
+    basevalue: 0
+    modifiers: []
+  lightningDamage:
     basevalue: 0
     modifiers: []
   maxHealth:
-    basevalue: 0
+    basevalue: 100
     modifiers: []
   armor:
     basevalue: 0
@@ -9791,6 +9800,10 @@ MonoBehaviour:
   evasion:
     basevalue: 0
     modifiers: []
+  magicResistance:
+    basevalue: 0
+    modifiers: []
+  currentHealth: 0
 --- !u!1 &1608495467
 GameObject:
   m_ObjectHideFlags: 0
@@ -17089,6 +17102,7 @@ MonoBehaviour:
   vfxMaterial: {fileID: 2100000, guid: 2d86f9b400671c741a3eb15b177253e7, type: 2}
   vfxDuration: 0.15
   hitFxPrefab: {fileID: 0}
+  criticalHitFxPrefab: {fileID: 0}
   hitFxPosition: {fileID: 0}
   randomHitOffset: {x: 0, y: 0}
 --- !u!1 &1861571471

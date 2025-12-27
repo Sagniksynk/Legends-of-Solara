@@ -10,6 +10,7 @@ public class EntityHit_Vfx : MonoBehaviour
 
     [Header("Hit Effects")]
     [SerializeField] private GameObject hitFxPrefab;
+    [SerializeField] private GameObject criticalHitFxPrefab;
     [SerializeField] private Transform hitFxPosition;
     [SerializeField] private Vector2 randomHitOffset;
 
@@ -19,14 +20,15 @@ public class EntityHit_Vfx : MonoBehaviour
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         originaMaterial = spriteRenderer.material;
     }
-    public virtual void PlayVfx()
+    public virtual void PlayVfx(bool isCritical)
     {
         if(onDamageVfxCoroutine != null)
         {
             StopCoroutine(onDamageVfxCoroutine);
         }
         onDamageVfxCoroutine = StartCoroutine(OnDamageVfxPlay());
-        if (hitFxPrefab != null)
+        GameObject prefabToSpawn = isCritical ? criticalHitFxPrefab : hitFxPrefab;
+        if (prefabToSpawn != null)
         {
             Vector3 spawnPos = hitFxPosition != null ? hitFxPosition.position : transform.position;
             float xOffset = Random.Range(-randomHitOffset.x, randomHitOffset.x);
@@ -35,7 +37,7 @@ public class EntityHit_Vfx : MonoBehaviour
             spawnPos += new Vector3(xOffset, yOffset, 0);
 
             Quaternion randomRot = Quaternion.Euler(0,0,Random.Range(0,360));
-            GameObject vfxPrefab =  Instantiate(hitFxPrefab, spawnPos, randomRot);
+            GameObject vfxPrefab =  Instantiate(prefabToSpawn, spawnPos, randomRot);
         }
     }
     private IEnumerator OnDamageVfxPlay()

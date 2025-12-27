@@ -15,7 +15,9 @@ public class Chest : MonoBehaviour, IDamageable
         cd = GetComponent<Collider2D>();
         animator = GetComponentInChildren<Animator>();
     }
-    public void TakeDamage(float damage, Transform attacker)
+
+    // FIXED: Updated to match new Interface signature
+    public void TakeDamage(float damage, float magicDamage, Transform attacker, bool isCritical)
     {
         if (isOpen) return;
         if (attacker.CompareTag("Player"))
@@ -23,16 +25,18 @@ public class Chest : MonoBehaviour, IDamageable
             OpenChest();
         }
     }
+
     private void OpenChest()
     {
         isOpen = true;
-        vfx.PlayVfx();
-        if(animator != null)
+        // FIXED: Added 'false' because a chest opening is never a "Critical Hit"
+        vfx.PlayVfx(false);
+
+        if (animator != null)
         {
             animator.SetBool("Open", true);
         }
         rb.linearVelocity = knockback;
         rb.angularVelocity = Random.Range(-100, 100);
     }
-
 }

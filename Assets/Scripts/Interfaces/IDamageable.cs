@@ -2,5 +2,6 @@ using UnityEngine;
 
 public interface IDamageable
 {
-    void TakeDamage(float damage, Transform attacker);
+    // Now accepts Magic Damage as a separate parameter
+    void TakeDamage(float physicalDamage, float magicDamage, Transform attacker, bool isCritical);
 }

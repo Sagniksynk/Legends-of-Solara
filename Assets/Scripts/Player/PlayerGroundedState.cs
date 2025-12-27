@@ -26,20 +26,18 @@ public class PlayerGroundedState : EntityState
         }
 
 
-        if(player.jumpInput && player.stamina.TryConsumeStamina(player.stamina.jumpCost))
+        if(player.jumpInput || player.HasBufferedJump())
         {
-            player.stateMachine.ChangeState(player.jumpState);
-            return;
+            if (player.stamina.TryConsumeStamina(player.stamina.jumpCost))
+            {
+                player.UseJumpBuffer();
+                player.stateMachine.ChangeState(player.jumpState);
+                return;
+            }
         }
         if (player.attackInput)
         {
             player.stateMachine.ChangeState(player.basicAttackState);
-            return;
-        }
-        if(player.HasBufferedJump() || player.jumpInput && player.stamina.TryConsumeStamina(player.stamina.jumpCost)) 
-        {
-            player.UseJumpBuffer();
-            player.stateMachine.ChangeState(player.jumpState);
             return;
         }
     }

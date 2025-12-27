@@ -1,94 +1,142 @@
 using UnityEngine;
 
+public enum ElementType
+{
+    None,
+    Fire,
+    Ice,
+    Lightning
+}
+
 public class Entity_Stats : MonoBehaviour
 {
     [Header("Major Stats")]
-    public Stat strength;     // 1 Str = 1 Dmg, 0.5% CritPower
+    public Stat strength;     // 1 Str = 1 Phy Dmg, 0.5% CritPower
     public Stat agility;      // 1 Agi = 0.5% Evasion, 0.3% CritChance
     public Stat intelligence; // 1 Int = 1 Magic Dmg, 0.5% Magic Res
     public Stat vitality;     // 1 Vit = 5 Health, 1 Armor
 
     [Header("Offensive Stats")]
-    public Stat damage;
+    public Stat damage;       // Base Physical Damage
     public Stat critChance;
-    public Stat critPower;              // Default value usually 150% (1.5f) or similar
+    public Stat critPower;    // Default 150%
 
-    [Header("Magic Stats")]
-    public Stat magicDamage;
-    public Stat magicResistance;
+    [Header("Elemental Stats")]
+    public Stat fireDamage;
+    public Stat iceDamage;
+    public Stat lightningDamage;
 
     [Header("Defensive Stats")]
     public Stat maxHealth;
     public Stat armor;
     public Stat evasion;
+    public Stat magicResistance;
 
-    private void Start()
+    protected virtual void Start()
     {
-        // Example: Initialize default crit power if not set in inspector
-        // critPower.SetDefaultValue(150); 
+        critPower.SetDefaultValue(150);
+        currentHealth = GetMaxHealth();
     }
 
-    #region Stat Calculations
+    #region Physical Calculations
 
-    // 1. Strength Calculations
-    // Strength gives +1 Physical Damage per point
     public float GetTotalDamage()
     {
-        float damageFromStrength = strength.GetValue();
-        return damage.GetValue() + damageFromStrength;
+        return damage.GetValue() + strength.GetValue();
     }
 
-    // Strength gives +0.5% Crit Power per point
-    public float GetTotalCritPower()
-    {
-        float critPowerFromStr = strength.GetValue() * 0.5f;
-        return critPower.GetValue() + critPowerFromStr;
-    }
-
-    // 2. Agility Calculations
-    // Agility gives +0.5% Evasion per point
-    public float GetTotalEvasion()
-    {
-        float evasionFromAgility = agility.GetValue() * 0.5f;
-        return evasion.GetValue() + evasionFromAgility;
-    }
-
-    // Agility gives +0.3% Crit Chance per point
     public float GetTotalCritChance()
     {
-        float critChanceFromAgility = agility.GetValue() * 0.3f;
-        return critChance.GetValue() + critChanceFromAgility;
+        return critChance.GetValue() + (agility.GetValue() * 0.3f);
     }
 
-    // 3. Intelligence Calculations
-    // Intelligence gives +1 Magic Damage per point
-    public float GetTotalMagicDamage()
+    public float GetTotalCritPower()
     {
-        float magicDamageFromInt = intelligence.GetValue();
-        return magicDamage.GetValue() + magicDamageFromInt;
-    }
-
-    // Intelligence gives +0.5% Elemental Resistance per point
-    public float GetTotalMagicResistance()
-    {
-        float magicResFromInt = intelligence.GetValue() * 0.5f;
-        return magicResistance.GetValue() + magicResFromInt;
-    }
-
-    // 4. Vitality Calculations
-    // Vitality gives +5 Max Health per point
-    public float GetMaxHealth()
-    {
-        float healthFromVitality = vitality.GetValue() * 5f;
-        return maxHealth.GetValue() + healthFromVitality;
-    }
-
-    // Vitality gives +1 Armor per point
-    public float GetTotalArmor()
-    {
-        float armorFromVitality = vitality.GetValue();
-        return armor.GetValue() + armorFromVitality;
+        return critPower.GetValue() + (strength.GetValue() * 0.5f);
     }
 
     #endregion
+
+    #region Elemental Calculations
+
+    public float GetTotalMagicDamage()
+    {
+        // 1. Get raw values
+        float fire = fireDamage.GetValue();
+        float ice = iceDamage.GetValue();
+        float lightning = lightningDamage.GetValue();
+
+        // 2. Find Dominant Element Value
+        float dominantValue = Mathf.Max(fire, ice, lightning);
+
+        // If no elemental damage exists, return 0
+        if (dominantValue <= 0) return 0;
+
+        // 3. Sum up the others (Total Sum - Dominant)
+        float totalElementalSum = fire + ice + lightning;
+        float otherElementsValue = totalElementalSum - dominantValue;
+
+        // 4. Formula: Dominant(100%) + Others(50%) + Intelligence
+        float finalMagicDamage = dominantValue + (otherElementsValue * 0.5f) + intelligence.GetValue();
+
+        return finalMagicDamage;
+    }
+
+    public ElementType GetDominantElement()
+    {
+        float fire = fireDamage.GetValue();
+        float ice = iceDamage.GetValue();
+        float lightning = lightningDamage.GetValue();
+
+        // If all are zero, no element
+        if (fire == 0 && ice == 0 && lightning == 0) return ElementType.None;
+
+        // Return the type with the highest value
+        if (fire > ice && fire > lightning) return ElementType.Fire;
+        if (ice > fire && ice > lightning) return ElementType.Ice;
+        if (lightning > fire && lightning > ice) return ElementType.Lightning;
+
+        // Fallback (e.g., if equal) -> Priority: Fire > Ice > Lightning
+        if (fire >= ice && fire >= lightning) return ElementType.Fire;
+        if (ice >= lightning) return ElementType.Ice;
+
+        return ElementType.Lightning;
+    }
+
+    public float GetTotalMagicResistance()
+    {
+        // Base Magic Res + (Int * 0.5)
+        return magicResistance.GetValue() + (intelligence.GetValue() * 0.5f);
+    }
+
+    #endregion
+
+    #region Defensive Calculations
+
+    public float GetMaxHealth()
+    {
+        return maxHealth.GetValue() + (vitality.GetValue() * 5f);
+    }
+
+    public float GetTotalArmor()
+    {
+        return armor.GetValue() + vitality.GetValue();
+    }
+
+    public float GetTotalEvasion()
+    {
+        return evasion.GetValue() + (agility.GetValue() * 0.5f);
+    }
+
+    #endregion
+
+    // --- Health Logic Integration ---
+    // Moving currentHealth here allows Stats to manage it directly
+    [HideInInspector] public float currentHealth;
+
+    public void DecreaseHealth(float amount)
+    {
+        currentHealth -= amount;
+        if (currentHealth < 0) currentHealth = 0;
+    }
 }
