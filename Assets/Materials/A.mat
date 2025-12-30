@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: HealthBar
-  m_Shader: {fileID: 4800000, guid: 3a4b802ba9dd8ef4cb8a7567333c6527, type: 3}
+  m_Name: A
+  m_Shader: {fileID: 4800000, guid: e1129074952dad149975d428f1a64e08, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -41,30 +41,30 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BubbleDensity: 0.15
-    - _BubbleSize: 0.2
-    - _BubbleSpeed: 0.2
     - _ColorMask: 15
+    - _CoreWidth: 0.8
     - _EnableExternalAlpha: 0
     - _FillAmount: 1
+    - _GlowBoost: 4
+    - _Speed: 0.5
     - _Stencil: 0
     - _StencilComp: 8
     - _StencilOp: 0
     - _StencilReadMask: 255
     - _StencilWriteMask: 255
-    - _WaveAmplitude: 0.03
-    - _WaveFrequency: 8.1
-    - _WaveSpeed: 1.5
+    - _StreamScale: 3
+    - _TipWidth: 0.015
+    - _UseUIAlphaClip: 0
+    - _WarpFrequency: 5
+    - _WarpStrength: 0.3
     - _ZWrite: 0
     m_Colors:
-    - _BubbleColor: {r: 0.5377358, g: 0.24603951, b: 0.24603951, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EmptyGlassColor: {r: 0.049999982, g: 0.049999982, b: 0.049999982, a: 0.8}
-    - _HighLightColor: {r: 1, g: 1, b: 1, a: 0.9}
-    - _LiquidColorBottom: {r: 0.5754717, g: 0.11509435, b: 0, a: 1}
-    - _LiquidColorTop: {r: 0.5, g: 0, b: 0, a: 1}
+    - _ColorBackground: {r: 0, g: 0.2, b: 0.8, a: 1}
+    - _ColorBright: {r: 0, g: 0.8, b: 1, a: 1}
+    - _ColorCore: {r: 0.8, g: 0.9, b: 1, a: 1}
+    - _ColorDark: {r: 0, g: 0.2, b: 0.8, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
-    - _RimGlowColor: {r: 1, g: 0.354379, b: 0.19999999, a: 1}
-    - _SurfaceLineColor: {r: 1, g: 0.39999998, b: 0.39999998, a: 0.5}
+    - _TipColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

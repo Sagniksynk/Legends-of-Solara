@@ -32,6 +32,10 @@ public class Entity_Stats : MonoBehaviour
     public Stat evasion;
     public Stat magicResistance;
 
+    [Header("Formula Constants")]
+    [Tooltip("The scaling constant for Armor calculation. Default 100.")]
+    [SerializeField] private float armorScaling = 100f;
+
     protected virtual void Start()
     {
         critPower.SetDefaultValue(150);
@@ -61,22 +65,17 @@ public class Entity_Stats : MonoBehaviour
 
     public float GetTotalMagicDamage()
     {
-        // 1. Get raw values
         float fire = fireDamage.GetValue();
         float ice = iceDamage.GetValue();
         float lightning = lightningDamage.GetValue();
 
-        // 2. Find Dominant Element Value
         float dominantValue = Mathf.Max(fire, ice, lightning);
 
-        // If no elemental damage exists, return 0
         if (dominantValue <= 0) return 0;
 
-        // 3. Sum up the others (Total Sum - Dominant)
         float totalElementalSum = fire + ice + lightning;
         float otherElementsValue = totalElementalSum - dominantValue;
 
-        // 4. Formula: Dominant(100%) + Others(50%) + Intelligence
         float finalMagicDamage = dominantValue + (otherElementsValue * 0.5f) + intelligence.GetValue();
 
         return finalMagicDamage;
@@ -88,15 +87,12 @@ public class Entity_Stats : MonoBehaviour
         float ice = iceDamage.GetValue();
         float lightning = lightningDamage.GetValue();
 
-        // If all are zero, no element
         if (fire == 0 && ice == 0 && lightning == 0) return ElementType.None;
 
-        // Return the type with the highest value
         if (fire > ice && fire > lightning) return ElementType.Fire;
         if (ice > fire && ice > lightning) return ElementType.Ice;
         if (lightning > fire && lightning > ice) return ElementType.Lightning;
 
-        // Fallback (e.g., if equal) -> Priority: Fire > Ice > Lightning
         if (fire >= ice && fire >= lightning) return ElementType.Fire;
         if (ice >= lightning) return ElementType.Ice;
 
@@ -105,7 +101,6 @@ public class Entity_Stats : MonoBehaviour
 
     public float GetTotalMagicResistance()
     {
-        // Base Magic Res + (Int * 0.5)
         return magicResistance.GetValue() + (intelligence.GetValue() * 0.5f);
     }
 
@@ -120,18 +115,37 @@ public class Entity_Stats : MonoBehaviour
 
     public float GetTotalArmor()
     {
+        // Vitality adds to Armor
         return armor.GetValue() + vitality.GetValue();
+    }
+
+    // --- NEW: Armor Mitigation Formula ---
+    // Formula: Mitigation = Armor / (Armor + ScalingConstant)
+    // Returns a float between 0.0 and 1.0 (e.g., 0.25 for 25% reduction)
+    public float GetPhysicalMitigation()
+    {
+        float totalArmor = GetTotalArmor();
+
+        // Prevent division by zero if using negative constants (unlikely but safe)
+        float denominator = totalArmor + armorScaling;
+        if (denominator == 0) return 0;
+
+        float mitigation = totalArmor / denominator;
+
+        // Clamp between 0 and 1 (0% to 100%)
+        return Mathf.Clamp01(mitigation);
     }
 
     public float GetTotalEvasion()
     {
-        return evasion.GetValue() + (agility.GetValue() * 0.5f);
+        float totalEvasion = evasion.GetValue() + (agility.GetValue() * 0.5f);
+
+        // --- NEW: Cap at 90% ---
+        return Mathf.Clamp(totalEvasion, 0, 90);
     }
 
     #endregion
 
-    // --- Health Logic Integration ---
-    // Moving currentHealth here allows Stats to manage it directly
     [HideInInspector] public float currentHealth;
 
     public void DecreaseHealth(float amount)

@@ -14,7 +14,8 @@ public class Entity_Combat : MonoBehaviour
 
     [Header("Combat Status")]
     [SerializeField] private float stunDuration = 1.5f;
-    [SerializeField] private Vector3 critShakeVelocity = new Vector3(2f, 2f, 0);
+    // FIXED: Lowered default values from (2,2) to (0.5, 0.5) for milder shake
+    [SerializeField] private Vector3 critShakeVelocity = new Vector3(0.2f, 0.2f, 0);
 
     private void Start()
     {
@@ -36,17 +37,12 @@ public class Entity_Combat : MonoBehaviour
 
             bool isCounterAttack = false;
 
-            // --- 0. CHECK FOR COUNTER ---
-            // We just flag it here, we don't apply Stun yet (Wait for knockback first)
             if (counterable != null && counterable.CanBeCountered())
             {
                 isCounterAttack = true;
-                // Start a delayed stun so the Knockback has time to apply force
                 StartCoroutine(ApplyStunWithDelay(counterable, 0.15f));
             }
 
-            // --- 1. Evasion Check ---
-            // (Skip evasion check if we successfully Countered - Counters shouldn't miss!)
             if (!isCounterAttack && targetStats != null)
             {
                 if (Random.Range(0, 100) < targetStats.GetTotalEvasion())
@@ -56,7 +52,6 @@ public class Entity_Combat : MonoBehaviour
                 }
             }
 
-            // --- 2. Calculate Damage ---
             float physicalDamage = stats.GetTotalDamage();
             bool isCrit = false;
 
@@ -69,26 +64,23 @@ public class Entity_Combat : MonoBehaviour
 
             float magicDamage = stats.GetTotalMagicDamage();
 
-            // --- 3. Game Feel ---
             if (isCrit && impulseSource != null)
             {
                 impulseSource.GenerateImpulseWithVelocity(critShakeVelocity);
             }
 
-            // --- 4. Apply Damage & Knockback ---
             if (damageable != null)
             {
-                // This applies the Force immediately
-                damageable.TakeDamage(physicalDamage, magicDamage, transform, isCrit);
+                // FIXED: Passing 'isCounterAttack' so Entity_Health knows to apply Heavy Knockback
+                damageable.TakeDamage(physicalDamage, magicDamage, transform, isCrit, isCounterAttack);
             }
         }
     }
 
-    // --- NEW HELPER: Ensures Knockback happens before Stun Freezes them ---
     private IEnumerator ApplyStunWithDelay(ICounterable counterable, float delay)
     {
-        yield return new WaitForSeconds(delay); // Wait for HitState/Knockback to start
-        counterable.StunFor(stunDuration);      // NOW freeze them in StunState
+        yield return new WaitForSeconds(delay);
+        counterable.StunFor(stunDuration);
     }
 
     private Collider2D[] GetDetectedColliders()

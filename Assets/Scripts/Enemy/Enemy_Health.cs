@@ -9,12 +9,16 @@ public class Enemy_Health : Entity_Health
         base.Start();
         enemy = GetComponent<Enemy>();
     }
-    public override void TakeDamage(float physicalDamage, float magicDamage, Transform attacker, bool isCritical)
+
+    // FIXED: Updated signature to include 'bool isCounterAttack'
+    public override void TakeDamage(float physicalDamage, float magicDamage, Transform attacker, bool isCritical, bool isCounterAttack)
     {
-        base.TakeDamage(physicalDamage,magicDamage, attacker,isCritical);
-        if(enemy != null && !isDead)
+        // Pass the new parameter to the base class
+        base.TakeDamage(physicalDamage, magicDamage, attacker, isCritical, isCounterAttack);
+
+        if (enemy != null && !isDead)
         {
             enemy.DamageImpact(attacker);
-        } 
+        }
     }
 }

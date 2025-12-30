@@ -34,23 +34,26 @@ public class Entity_Health : MonoBehaviour, IDamageable
 
     protected virtual void Start()
     {
-        // Stats now manages the health value, we just trigger the update for UI
         OnHealthChanged?.Invoke();
     }
 
-    // Updated Interface Implementation
-    public virtual void TakeDamage(float physicalDamage, float magicDamage, Transform attacker, bool isCritical)
+    public virtual void TakeDamage(float physicalDamage, float magicDamage, Transform attacker, bool isCritical, bool isCounterAttack)
     {
         if (isDead) return;
 
-        // 1. Calculate Physical vs Armor
-        float finalPhysical = physicalDamage - stats.GetTotalArmor();
-        finalPhysical = Mathf.Clamp(finalPhysical, 0, float.MaxValue); // Can't deal negative damage
+        // --- NEW ARMOR CALCULATION ---
+        // 1. Get Mitigation Percentage (e.g., 0.33 for 33%)
+        float physicalMitigation = stats.GetPhysicalMitigation();
 
-        // 2. Calculate Magic vs Magic Resistance
-        // Note: Magic Resistance is often a percentage (e.g. 10 Int = 5% resist), 
-        // or flat reduction. Based on your prompt "0.5% per point", it is percentage based.
-        float resistancePercent = stats.GetTotalMagicResistance(); // e.g., 5.0 for 5%
+        // 2. Apply Reduction: Damage * (1 - Mitigation)
+        // Example: 100 Damage vs 50 Armor (33% mitigation) -> 100 * (1 - 0.33) = 67 Damage
+        float finalPhysical = physicalDamage * (1 - physicalMitigation);
+
+        // Ensure non-negative
+        finalPhysical = Mathf.Clamp(finalPhysical, 0, float.MaxValue);
+
+        // --- MAGIC CALCULATION (Existing) ---
+        float resistancePercent = stats.GetTotalMagicResistance();
         float finalMagic = magicDamage * (1 - (resistancePercent / 100f));
         finalMagic = Mathf.Clamp(finalMagic, 0, float.MaxValue);
 
@@ -61,34 +64,29 @@ public class Entity_Health : MonoBehaviour, IDamageable
             ShowFloatingText(totalDamage, isCritical);
         }
 
-        // 3. Apply Knockback & VFX
-        Vector2 knockback = CalculateKnockback(totalDamage, attacker);
-        float duration = CalculateDuration(totalDamage);
+        Vector2 knockback = CalculateKnockback(totalDamage, attacker, isCounterAttack);
+        float duration = CalculateDuration(totalDamage, isCounterAttack);
 
         entity?.RecieveKnockback(knockback, duration);
         entityHit_Vfx?.PlayVfx(isCritical);
 
-        // 4. Reduce Health
         ReduceHealth(totalDamage);
     }
 
     private void ShowFloatingText(float damageAmount, bool isCrit)
     {
-        Vector3 ramdomOffset = new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(0.5f, 1f),0);
+        Vector3 ramdomOffset = new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(0.5f, 1f), 0);
         GameObject textObj = Instantiate(floatingTextPrefab, transform.position + ramdomOffset, Quaternion.identity);
         FloatingText floatingText = textObj.GetComponent<FloatingText>();
-        if(floatingText != null)
+        if (floatingText != null)
         {
-            floatingText.Setup(Mathf.RoundToInt(damageAmount).ToString(),isCrit);
+            floatingText.Setup(Mathf.RoundToInt(damageAmount).ToString(), isCrit);
         }
     }
+
     protected void ReduceHealth(float damage)
     {
-        // We use the Stats script to track health now, or sync it here.
-        // For simplicity, we can keep tracking it here or call stats.DecreaseHealth
-        // Let's modify stats directly to keep one source of truth:
         stats.DecreaseHealth(damage);
-
         OnHealthChanged?.Invoke();
 
         if (stats.currentHealth <= 0)
@@ -109,14 +107,20 @@ public class Entity_Health : MonoBehaviour, IDamageable
         entity.Die();
     }
 
-    private Vector2 CalculateKnockback(float damage, Transform damageDealer)
+    private Vector2 CalculateKnockback(float damage, Transform damageDealer, bool isCounterAttack)
     {
         int direction = transform.position.x > damageDealer.position.x ? 1 : -1;
-        Vector2 knockback = IsHeavyDamage(damage) ? heavyKnockbackPower : knockbackPower;
+
+        Vector2 knockback = (isCounterAttack || IsHeavyDamage(damage)) ? heavyKnockbackPower : knockbackPower;
+
         knockback.x = knockback.x * direction;
         return knockback;
     }
 
-    private float CalculateDuration(float damage) => IsHeavyDamage(damage) ? heavyknockbackDuration : knockbackDuration;
+    private float CalculateDuration(float damage, bool isCounterAttack)
+    {
+        return (isCounterAttack || IsHeavyDamage(damage)) ? heavyknockbackDuration : knockbackDuration;
+    }
+
     private bool IsHeavyDamage(float damage) => damage / stats.GetMaxHealth() > heavyDamageThreshold;
 }

@@ -9,6 +9,7 @@ public class Chest : MonoBehaviour, IDamageable
     private EntityHit_Vfx vfx => GetComponent<EntityHit_Vfx>();
     [Header("Open Details")]
     [SerializeField] private Vector2 knockback;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -16,8 +17,8 @@ public class Chest : MonoBehaviour, IDamageable
         animator = GetComponentInChildren<Animator>();
     }
 
-    // FIXED: Updated to match new Interface signature
-    public void TakeDamage(float damage, float magicDamage, Transform attacker, bool isCritical)
+    // FIXED: Added isCounterAttack parameter to match Interface
+    public void TakeDamage(float damage, float magicDamage, Transform attacker, bool isCritical, bool isCounterAttack)
     {
         if (isOpen) return;
         if (attacker.CompareTag("Player"))
@@ -29,7 +30,6 @@ public class Chest : MonoBehaviour, IDamageable
     private void OpenChest()
     {
         isOpen = true;
-        // FIXED: Added 'false' because a chest opening is never a "Critical Hit"
         vfx.PlayVfx(false);
 
         if (animator != null)
