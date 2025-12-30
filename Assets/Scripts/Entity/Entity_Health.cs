@@ -1,4 +1,5 @@
 using System;
+using Unity.Mathematics;
 using UnityEngine;
 
 public class Entity_Health : MonoBehaviour, IDamageable
@@ -11,6 +12,9 @@ public class Entity_Health : MonoBehaviour, IDamageable
     public event Action OnHealthChanged;
 
     public bool isDead { get; private set; }
+
+    [Header("Visuals")]
+    [SerializeField] private GameObject floatingTextPrefab;
 
     [Header("Damage Knockback")]
     [SerializeField] private Vector2 knockbackPower = new Vector2(1.5f, 2.5f);
@@ -52,6 +56,11 @@ public class Entity_Health : MonoBehaviour, IDamageable
 
         float totalDamage = finalPhysical + finalMagic;
 
+        if (floatingTextPrefab != null)
+        {
+            ShowFloatingText(totalDamage, isCritical);
+        }
+
         // 3. Apply Knockback & VFX
         Vector2 knockback = CalculateKnockback(totalDamage, attacker);
         float duration = CalculateDuration(totalDamage);
@@ -63,6 +72,16 @@ public class Entity_Health : MonoBehaviour, IDamageable
         ReduceHealth(totalDamage);
     }
 
+    private void ShowFloatingText(float damageAmount, bool isCrit)
+    {
+        Vector3 ramdomOffset = new Vector3(UnityEngine.Random.Range(-0.5f, 0.5f), UnityEngine.Random.Range(0.5f, 1f),0);
+        GameObject textObj = Instantiate(floatingTextPrefab, transform.position + ramdomOffset, Quaternion.identity);
+        FloatingText floatingText = textObj.GetComponent<FloatingText>();
+        if(floatingText != null)
+        {
+            floatingText.Setup(Mathf.RoundToInt(damageAmount).ToString(),isCrit);
+        }
+    }
     protected void ReduceHealth(float damage)
     {
         // We use the Stats script to track health now, or sync it here.
