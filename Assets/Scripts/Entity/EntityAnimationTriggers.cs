@@ -41,4 +41,9 @@ public class EntityAnimationTriggers : MonoBehaviour
             skeleton.CloseCounterAttackWindow();
         }
     }
+    public void CastSpellTrigger()
+    {
+        // Find the controller on the parent (Player) and fire the projectile
+        GetComponentInParent<Player_MagicController>().CastSpell();
+    }
 }

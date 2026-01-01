@@ -6,10 +6,11 @@ public class UI_HealthBar : MonoBehaviour
     private Entity entity;
 
     [Header("Target Entity")]
-    [SerializeField] private Entity_Health entityHealth;
+    // 1. CHANGED: Now looks for Entity_Stats instead of Entity_Health
+    [SerializeField] private Entity_Stats entityStats;
 
     [Header("Visibility Settings")]
-    [SerializeField] private bool alwaysVisible = true; // TRUE for Player, FALSE for Enemy
+    [SerializeField] private bool alwaysVisible = true;
     [SerializeField] private float visibleDuration = 3f;
     private float visibleTimer;
 
@@ -26,23 +27,23 @@ public class UI_HealthBar : MonoBehaviour
         slider = GetComponentInChildren<Slider>();
         barContent = slider.gameObject;
 
-        // 1. AUTO-FIND LOGIC
-        if (entityHealth == null)
+        // 2. AUTO-FIND LOGIC (Updated type)
+        entity = GetComponentInParent<Entity>();
+        if (entityStats == null)
         {
-            entity = GetComponentInParent<Entity>();
-            entityHealth = GetComponentInParent<Entity_Health>();
+            entityStats = GetComponentInParent<Entity_Stats>();
         }
 
-        if (entityHealth != null)
+        if (entityStats != null)
         {
-            entityHealth.OnHealthChanged += OnHealthChanged;
+            // 3. EVENT SUBSCRIPTION (Updated to match Entity_Stats event name)
+            entityStats.onHealthChanged += OnHealthChanged;
 
-            // 2. SET INITIAL VALUE SILENTLY
-            // We set the value directly without triggering the "Show" timer
-            slider.value = entityHealth.GetHealthNormalized();
+            // 4. INITIAL VALUE
+            slider.value = entityStats.GetHealthNormalized();
         }
 
-        // 3. HIDE ON START (If enemy)
+        // HIDE ON START
         if (!alwaysVisible)
         {
             barContent.SetActive(false);
@@ -53,32 +54,24 @@ public class UI_HealthBar : MonoBehaviour
         }
     }
 
-    // This function runs ONLY when the Entity gets hit (TakeDamage -> ReduceHealth)
     private void OnHealthChanged()
     {
-        UpdateHealthValue();
-
         // Show the bar because we were hit
-        if (!alwaysVisible && !entityHealth.isDead)
+        if (!alwaysVisible && entityStats.currentHealth > 0)
         {
             barContent.SetActive(true);
             visibleTimer = visibleDuration;
         }
     }
 
-    private void UpdateHealthValue()
-    {
-        // Just updates the data, doesn't touch visibility
-    }
-
     private void Update()
     {
         if (entity != null) myTransform.rotation = Quaternion.identity;
 
-        if (slider == null || entityHealth == null) return;
+        if (slider == null || entityStats == null) return;
 
-        // DEATH CHECK
-        if (entityHealth.isDead)
+        // 5. DEATH CHECK (Checked against health <= 0)
+        if (entityStats.currentHealth <= 0)
         {
             barContent.SetActive(false);
             return;
@@ -95,9 +88,8 @@ public class UI_HealthBar : MonoBehaviour
         }
 
         // SMOOTHING
-        float targetHealth = entityHealth.GetHealthNormalized();
+        float targetHealth = entityStats.GetHealthNormalized();
 
-        // Only Lerp if the bar is actually visible to save performance
         if (barContent.activeSelf)
         {
             slider.value = Mathf.Lerp(slider.value, targetHealth, Time.deltaTime * smoothingSpeed);
@@ -106,9 +98,9 @@ public class UI_HealthBar : MonoBehaviour
 
     private void OnDisable()
     {
-        if (entityHealth != null)
+        if (entityStats != null)
         {
-            entityHealth.OnHealthChanged -= OnHealthChanged;
+            entityStats.onHealthChanged -= OnHealthChanged;
         }
     }
 }

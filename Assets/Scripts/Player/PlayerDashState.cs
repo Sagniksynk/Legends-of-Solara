@@ -6,7 +6,6 @@ public class PlayerDashState : EntityState
     private float dashStartTime;
     private Vector2 dashDirection;
 
-
     public PlayerDashState(Player player, StateMachine stateMachine, string animBoolName) : base(player, stateMachine, animBoolName)
     {
         this.player = player;
@@ -16,11 +15,10 @@ public class PlayerDashState : EntityState
     {
         base.Enter();
 
-        player.UseDash(); // Trigger the cooldown
+        player.UseDash();
         dashStartTime = Time.time;
 
-        // Determine dash direction based on player input
-        // If no input, dash in the direction the player is facing
+        // Direction Logic
         dashDirection = player.moveInput;
         if (dashDirection == Vector2.zero)
         {
@@ -28,46 +26,52 @@ public class PlayerDashState : EntityState
         }
         else
         {
-            dashDirection.Normalize(); // Normalize for consistent speed in all directions
+            dashDirection.Normalize();
         }
 
-        // Freeze player vertically and apply dash speed in the chosen direction
+        // 1. Turn off Gravity
         player.rb.gravityScale = 0;
+
+        // 2. Apply Speed
         player.SetVelocity(player.dashSpeed * dashDirection.x, player.dashSpeed * dashDirection.y);
     }
 
     public override void Update()
     {
         base.Update();
-        
-        // Face the direction of the dash if there's horizontal movement
+
+        // Face Direction
         if (dashDirection.x != 0)
         {
             player.HandleFlip(dashDirection.x);
         }
 
-        // After dash duration, transition to another state
+        // Timer Logic
         if (Time.time >= dashStartTime + player.dashDuration)
         {
-            // Apply a small residual velocity for a less abrupt stop
-            player.SetVelocity(player.movespeed * dashDirection.x * 0.5f, 0); 
+            // Note: We do NOT set velocity here anymore. 
+            // We let the next state (Idle/Fall) handle physics.
+            // Setting velocity here is risky if we transition immediately.
 
             if (player.isGrounded)
-            {
                 stateMachine.ChangeState(player.idleState);
-            }
             else
-            {
                 stateMachine.ChangeState(player.fallState);
-            }
         }
     }
-    
+
     public override void Exit()
     {
         base.Exit();
-        // Restore gravity
+
+        // 3. RESTORE GRAVITY (Crucial)
+        // Ensure 'player.defaultGravity' is actually set to something like 3 or 5 in Player.cs!
+        // If unsure, hardcode it to 1f or 3f to test.
         player.rb.gravityScale = player.defaultGravity;
-        // Don't reset velocity here to allow for the residual velocity from Update()
+
+        // 4. KILL VERTICAL MOMENTUM (The Fix for "Flying Up")
+        // If we dashed Up-Right, we have huge Y velocity. 
+        // We must kill that so we don't launch into space when gravity returns.
+        player.SetVelocity(player.rb.linearVelocity.x, 0);
     }
 }

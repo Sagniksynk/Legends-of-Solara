@@ -19,9 +19,11 @@ public class Player : Entity
     public PlayerWallSlideState wallSlideState { get; private set; }
     public PlayerDashState dashState { get; private set; }
     public PlayerBasicAttackState basicAttackState { get; private set; }
+    public PlayerSpellCastState spellCastState { get; private set; }
 
     [Header("Movement Details")]
     public float movespeed;
+    private float defaultMoveSpeed;
     public float jumpForce = 5f;
     public float coyoteTime = 0.15f; 
     [Range(0,1)]
@@ -53,7 +55,8 @@ public class Player : Entity
     public float lastGroundedTime { get; private set; }
     public override void Awake()
     {
-        base.Awake(); 
+        base.Awake();
+        defaultMoveSpeed = movespeed;
         input = new PlayerInputSet();
 
         idleState = new PlayerIdleState(this, stateMachine, "idle");
@@ -64,6 +67,7 @@ public class Player : Entity
         dashState = new PlayerDashState(this, stateMachine, "dash");
         basicAttackState = new PlayerBasicAttackState(this, stateMachine, "basicAttack");
         deadState = new PlayerDeathState(this, stateMachine, "die");
+        spellCastState = new PlayerSpellCastState(this, stateMachine, "castSpell");
     }
 
     private void OnEnable()
@@ -145,7 +149,14 @@ public class Player : Entity
         }
        queuedAttackCo = StartCoroutine(EnterAttackStateWithDelayCo());
     }
-
+    protected override void ApplySlow(float slowPercentage)
+    {
+        movespeed = defaultMoveSpeed * (1 - slowPercentage);
+    }
+    protected override void RestoreSpeed()
+    {
+        movespeed = defaultMoveSpeed;
+    }
     private IEnumerator EnterAttackStateWithDelayCo()
     {
         yield return new WaitForEndOfFrame();

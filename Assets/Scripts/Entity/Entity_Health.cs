@@ -1,5 +1,4 @@
 using System;
-using Unity.Mathematics;
 using UnityEngine;
 
 public class Entity_Health : MonoBehaviour, IDamageable
@@ -8,8 +7,8 @@ public class Entity_Health : MonoBehaviour, IDamageable
     private Entity entity;
     private Entity_Stats stats;
 
-    public event Action OnDie;
     public event Action OnHealthChanged;
+    public event Action OnDie; // Fixed event name order
 
     public bool isDead { get; private set; }
 
@@ -41,18 +40,28 @@ public class Entity_Health : MonoBehaviour, IDamageable
     {
         if (isDead) return;
 
-        // --- NEW ARMOR CALCULATION ---
-        // 1. Get Mitigation Percentage (e.g., 0.33 for 33%)
-        float physicalMitigation = stats.GetPhysicalMitigation();
+        float armorPenetration = 0;
+        float armorShred = 0;
 
-        // 2. Apply Reduction: Damage * (1 - Mitigation)
-        // Example: 100 Damage vs 50 Armor (33% mitigation) -> 100 * (1 - 0.33) = 67 Damage
+        if (attacker != null)
+        {
+            Entity_Stats attackerStats = attacker.GetComponent<Entity_Stats>();
+            if (attackerStats != null)
+            {
+                armorPenetration = attackerStats.GetArmorPenetration();
+                armorShred = attackerStats.GetArmorShred();
+            }
+        }
+        if (armorShred > 0)
+        {
+            stats.DamageArmor(armorShred);
+        }
+
+        // --- DAMAGE CALCULATIONS ---
+        float physicalMitigation = stats.GetPhysicalMitigation(armorPenetration);
         float finalPhysical = physicalDamage * (1 - physicalMitigation);
-
-        // Ensure non-negative
         finalPhysical = Mathf.Clamp(finalPhysical, 0, float.MaxValue);
 
-        // --- MAGIC CALCULATION (Existing) ---
         float resistancePercent = stats.GetTotalMagicResistance();
         float finalMagic = magicDamage * (1 - (resistancePercent / 100f));
         finalMagic = Mathf.Clamp(finalMagic, 0, float.MaxValue);
@@ -64,13 +73,19 @@ public class Entity_Health : MonoBehaviour, IDamageable
             ShowFloatingText(totalDamage, isCritical);
         }
 
-        Vector2 knockback = CalculateKnockback(totalDamage, attacker, isCounterAttack);
-        float duration = CalculateDuration(totalDamage, isCounterAttack);
-
-        entity?.RecieveKnockback(knockback, duration);
+         Vector2 knockback = CalculateKnockback(totalDamage, attacker, isCounterAttack);
+         float duration = CalculateDuration(totalDamage, isCounterAttack);
+         entity?.RecieveKnockback(knockback, duration);
+        
+        
         entityHit_Vfx?.PlayVfx(isCritical);
 
         ReduceHealth(totalDamage);
+
+        
+        
+        
+
     }
 
     private void ShowFloatingText(float damageAmount, bool isCrit)

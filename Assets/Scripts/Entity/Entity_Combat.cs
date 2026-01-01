@@ -32,6 +32,7 @@ public class Entity_Combat : MonoBehaviour
         foreach (var collider in colliders)
         {
             Entity_Stats targetStats = collider.GetComponent<Entity_Stats>();
+            Entity_Health targetHealth = collider.GetComponent<Entity_Health>();
             IDamageable damageable = collider.GetComponent<IDamageable>();
             ICounterable counterable = collider.GetComponent<ICounterable>();
 
@@ -40,7 +41,7 @@ public class Entity_Combat : MonoBehaviour
             if (counterable != null && counterable.CanBeCountered())
             {
                 isCounterAttack = true;
-                StartCoroutine(ApplyStunWithDelay(counterable, 0.15f));
+                StartCoroutine(ApplyStunWithDelay(counterable, 0.15f,targetHealth));
             }
 
             if (!isCounterAttack && targetStats != null)
@@ -77,9 +78,11 @@ public class Entity_Combat : MonoBehaviour
         }
     }
 
-    private IEnumerator ApplyStunWithDelay(ICounterable counterable, float delay)
+    private IEnumerator ApplyStunWithDelay(ICounterable counterable, float delay, Entity_Health targetHealth)
     {
         yield return new WaitForSeconds(delay);
+        if(targetHealth != null && targetHealth.isDead)
+            yield break;
         counterable.StunFor(stunDuration);
     }
 

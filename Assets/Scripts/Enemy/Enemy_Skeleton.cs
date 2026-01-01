@@ -46,6 +46,7 @@ public class Enemy_Skeleton : Enemy, ICounterable
     }
     public void StunFor(float duration)
     {
+        if (GetComponent<Entity_Health>().isDead) return;
         stunnedState.SetStunDuration(duration);
         stateMachine.ChangeState(stunnedState);
     }
